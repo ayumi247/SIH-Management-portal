@@ -1,0 +1,38 @@
+# Frontend build files
+frontend/.next/
+frontend/node_modules/
+frontend/.turbo/
+frontend/out/
+frontend/build/
+
+# Backend Virtual Environment
+backend/venv/
+backend/.venv/
+backend/env/
+venv/
+.venv/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database Files
+*.sqlite3
+*.db
+
+# Compiler & IDE Files
+.vscode/
+.idea/
+*.swp
+
+# Environment Files
+.env
+.env.*
+!.env.example
+
+# OS Files
+.DS_Store
+Thumbs.db
