@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlmodel import Session, select
 from uuid import UUID
 from app.core.db import get_session
@@ -9,7 +9,7 @@ from app.api.deps import get_current_user
 router = APIRouter(prefix="/teams", tags=["Teams"])
 
 @router.post("")
-def create_team(team: TeamCreate, current_user: Users = Depends(get_current_user), session: Session = Depends(get_session)):
+def create_team(team: TeamCreate, background_tasks: BackgroundTasks, current_user: Users = Depends(get_current_user), session: Session = Depends(get_session)):
     # Single Team Lock (Leader)
     if session.exec(select(TeamMembers).where(TeamMembers.user_id == current_user.id)).first():
         raise HTTPException(status_code=400, detail="The Single Team Lock: You are already in a team.")
@@ -69,10 +69,10 @@ def create_team(team: TeamCreate, current_user: Users = Depends(get_current_user
         session.add(TeamMembers(team_id=new_team.id, user_id=existing_user.id))
         
         # Trigger Celery Email
-        from app.worker.tasks import send_email_notification
+        from app.core.email import send_email_notification
         subject = f"You've been added to team {new_team.name}!"
         body = f"Hello {existing_user.name},\n\nYou have been added to the team {new_team.name} by {current_user.name} for the SIH Matchmaker. Log in to check your team hub!"
-        send_email_notification.apply_async(args=[existing_user.email, subject, body], queue="sih_tasks")
+        background_tasks.add_task(send_email_notification, existing_user.email, subject, body)
         
     session.commit()
     return new_team
@@ -153,7 +153,7 @@ def get_team_requests(team_id: UUID, current_user: Users = Depends(get_current_u
     return result
 
 @router.put("/{team_id}/requests/{req_id}")
-def resolve_request(team_id: UUID, req_id: UUID, req_update: JoinRequestUpdate, current_user: Users = Depends(get_current_user), session: Session = Depends(get_session)):
+def resolve_request(team_id: UUID, req_id: UUID, req_update: JoinRequestUpdate, background_tasks: BackgroundTasks, current_user: Users = Depends(get_current_user), session: Session = Depends(get_session)):
     team = session.get(Teams, team_id)
     if not team or team.leader_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to manage this team")
@@ -180,10 +180,10 @@ def resolve_request(team_id: UUID, req_id: UUID, req_update: JoinRequestUpdate, 
         # Trigger Celery Email
         req_user = session.get(Users, req.user_id)
         if req_user and req_user.email:
-            from app.worker.tasks import send_email_notification
+            from app.core.email import send_email_notification
             subject = f"You have been accepted into {team.name}!"
             body = f"Congratulations {req_user.name}, your request to join team {team.name} has been accepted by the leader."
-            send_email_notification.apply_async(args=[req_user.email, subject, body], queue="sih_tasks")
+            background_tasks.add_task(send_email_notification, req_user.email, subject, body)
             
         return {"message": "Request accepted and member added"}
         

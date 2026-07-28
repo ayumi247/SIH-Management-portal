@@ -1,17 +1,43 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query
 from sqlmodel import Session, select
-from typing import Optional
+from typing import Optional, Dict, List
 from uuid import UUID
 import json
-import asyncio
 from jose import jwt, JWTError
 
 from app.core.db import get_session
 from app.core.config import settings
-from app.core.redis import get_redis
 from app.models.domain import Users, Teams, TeamMembers, Messages
 
 router = APIRouter(prefix="/chat", tags=["Real-time Chat"])
+
+class ConnectionManager:
+    def __init__(self):
+        # Maps team_id to a list of active WebSocket connections
+        self.active_connections: Dict[str, List[WebSocket]] = {}
+
+    async def connect(self, websocket: WebSocket, team_id: str):
+        await websocket.accept()
+        if team_id not in self.active_connections:
+            self.active_connections[team_id] = []
+        self.active_connections[team_id].append(websocket)
+
+    def disconnect(self, websocket: WebSocket, team_id: str):
+        if team_id in self.active_connections:
+            if websocket in self.active_connections[team_id]:
+                self.active_connections[team_id].remove(websocket)
+            if not self.active_connections[team_id]:
+                del self.active_connections[team_id]
+
+    async def broadcast(self, message: str, team_id: str):
+        if team_id in self.active_connections:
+            for connection in self.active_connections[team_id]:
+                try:
+                    await connection.send_text(message)
+                except Exception:
+                    pass
+
+manager = ConnectionManager()
 
 async def get_user_from_token(token: str, session: Session) -> Optional[Users]:
     try:
@@ -29,8 +55,7 @@ async def websocket_chat(
     websocket: WebSocket,
     team_id: UUID,
     token: str = Query(...),
-    session: Session = Depends(get_session),
-    redis = Depends(get_redis)
+    session: Session = Depends(get_session)
 ):
     # Authenticate before accepting
     user = await get_user_from_token(token, session)
@@ -45,24 +70,9 @@ async def websocket_chat(
         await websocket.close(code=4003, reason="Forbidden")
         return
 
-    await websocket.accept()
+    team_id_str = str(team_id)
+    await manager.connect(websocket, team_id_str)
     
-    channel_name = f"team:{team_id}"
-    pubsub = redis.pubsub()
-    await pubsub.subscribe(channel_name)
-    
-    # Task to listen to Redis and send to WebSocket
-    async def redis_listener():
-        try:
-            async for message in pubsub.listen():
-                if message["type"] == "message":
-                    data = message["data"]
-                    await websocket.send_text(data)
-        except asyncio.CancelledError:
-            await pubsub.unsubscribe(channel_name)
-
-    listener_task = asyncio.create_task(redis_listener())
-
     try:
         while True:
             # Receive from WebSocket
@@ -73,15 +83,14 @@ async def websocket_chat(
             session.add(new_message)
             session.commit()
             
-            # Publish to Redis
+            # Publish to all connected clients in the team
             payload = json.dumps({
                 "sender_id": str(user.id),
                 "sender_name": user.name,
                 "content": data,
                 "timestamp": new_message.timestamp.isoformat()
             })
-            await redis.publish(channel_name, payload)
+            await manager.broadcast(payload, team_id_str)
             
     except WebSocketDisconnect:
-        listener_task.cancel()
-        await pubsub.unsubscribe(channel_name)
+        manager.disconnect(websocket, team_id_str)

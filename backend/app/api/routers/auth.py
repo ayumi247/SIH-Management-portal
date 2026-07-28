@@ -72,7 +72,8 @@ def get_me(current_user: Users = Depends(get_current_user), session: Session = D
     }
 
 
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel
 
 class ProfileUpdate(BaseModel):
     github_url: Optional[str] = None

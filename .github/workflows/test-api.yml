@@ -1,0 +1,56 @@
+name: API Tests
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    # Set up a background PostgreSQL service for testing
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        cd backend
+        pip install -r requirements.txt
+        pip install pytest httpx pytest-asyncio
+        
+    - name: Run Pytest
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+        SECRET_KEY: test_secret_key_ci
+        ALGORITHM: HS256
+        SENDPULSE_API_KEY: fake_key
+      run: |
+        cd backend
+        pytest tests/

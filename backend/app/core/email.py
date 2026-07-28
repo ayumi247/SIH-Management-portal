@@ -1,11 +1,8 @@
 import os
 import httpx
-from app.worker.celery_app import celery_app
 
-SENDPULSE_API_KEY = os.getenv("SENDPULSE_API_KEY")
-
-@celery_app.task(name="send_email_notification")
 def send_email_notification(to_email: str, subject: str, text: str):
+    SENDPULSE_API_KEY = os.getenv("SENDPULSE_API_KEY")
     if not SENDPULSE_API_KEY:
         print("Failed to get SendPulse API Key. Check credentials.")
         return False
@@ -34,10 +31,14 @@ def send_email_notification(to_email: str, subject: str, text: str):
         }
     }
     
-    response = httpx.post(url, headers=headers, json=payload)
-    if response.status_code == 200:
-        print(f"Email successfully sent to {to_email}")
-        return True
-    else:
-        print(f"Failed to send email: {response.text}")
+    try:
+        response = httpx.post(url, headers=headers, json=payload, timeout=10.0)
+        if response.status_code == 200:
+            print(f"Email successfully sent to {to_email}")
+            return True
+        else:
+            print(f"Failed to send email: {response.text}")
+            return False
+    except Exception as e:
+        print(f"Exception while sending email: {e}")
         return False

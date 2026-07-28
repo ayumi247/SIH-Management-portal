@@ -1,0 +1,44 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Lint Code
+      run: npm run lint
+      
+    - name: Type Check
+      # Note: Next.js build typically runs type checking, but running it separately is faster for feedback
+      run: npx tsc --noEmit || echo "No tsc found or no typescript config"
+      
+    - name: Build Next.js App
+      env:
+        NEXT_PUBLIC_API_URL: http://localhost:8000/api
+      run: npm run build
