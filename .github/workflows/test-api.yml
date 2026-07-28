@@ -53,4 +53,4 @@ jobs:
         SENDPULSE_API_KEY: fake_key
       run: |
         cd backend
-        pytest tests/
+        python -m pytest tests/
