@@ -45,7 +45,8 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google/login";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+    window.location.href = `${apiUrl}/auth/google/login`;
   };
 
   return (
