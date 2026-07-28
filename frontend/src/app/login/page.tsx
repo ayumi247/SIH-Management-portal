@@ -58,17 +58,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex w-full relative overflow-hidden">
-      {/* Dynamic Background */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/30 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* Aesthetic Left Side */}
-      <div className="hidden lg:flex flex-1 flex-col justify-center items-center relative z-10 p-12 bg-zinc-900/40 backdrop-blur-3xl border-r border-white/5">
+      <div className="hidden lg:flex flex-1 flex-col justify-center items-center relative z-10 p-12 bg-zinc-950 border-r border-zinc-900">
         <div className="max-w-lg space-y-6 text-left">
-          <div className="inline-flex items-center rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-sm text-indigo-300 backdrop-blur-md">
+          <div className="inline-flex items-center rounded-full border border-blue-500 bg-blue-500/10 px-3 py-1 text-sm text-blue-400">
             ✨ SIH 2026 Matchmaker
           </div>
-          <h1 className="text-6xl font-extrabold tracking-tight bg-gradient-to-br from-white via-white to-zinc-500 bg-clip-text text-transparent">
+          <h1 className="text-6xl font-extrabold tracking-tight text-white">
             Find Your Perfect <br /> Hackathon Team.
           </h1>
           <p className="text-xl text-zinc-400">
@@ -78,8 +73,8 @@ export default function LoginPage() {
       </div>
 
       {/* Login Form Right Side */}
-      <div className="flex-1 flex items-center justify-center p-6 relative z-10">
-        <Card className="w-full max-w-md bg-zinc-900/60 border-white/10 backdrop-blur-xl shadow-2xl">
+      <div className="flex-1 flex items-center justify-center p-6 relative z-10 bg-zinc-950">
+        <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 shadow-none">
           <CardHeader className="space-y-2">
             <CardTitle className="text-3xl font-bold tracking-tight">Welcome back</CardTitle>
             <CardDescription className="text-zinc-400">Enter your credentials to access your dashboard</CardDescription>
@@ -104,7 +99,7 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="password">Password</Label>
-                  <Link href="#" className="text-sm text-indigo-400 hover:text-indigo-300">Forgot password?</Link>
+                  <Link href="#" className="text-sm text-blue-500 hover:text-blue-400">Forgot password?</Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
@@ -119,7 +114,7 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)]" disabled={loading}>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-all" disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <LogIn className="h-4 w-4 mr-2" />}
                 Sign In
               </Button>
@@ -148,7 +143,7 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex justify-center text-sm text-zinc-400">
             Don't have an account? 
-            <Link href="/register" className="ml-1 text-indigo-400 hover:text-indigo-300 font-medium">Create one</Link>
+            <Link href="/register" className="ml-1 text-blue-500 hover:text-blue-400 font-medium">Create one</Link>
           </CardFooter>
         </Card>
       </div>

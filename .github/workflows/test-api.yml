@@ -47,9 +47,8 @@ jobs:
         SECRET_KEY: test_secret_key_ci
         ALGORITHM: HS256
         SENDPULSE_API_KEY: fake_key
-        GOOGLE_CLIENT_ID: fake_client_id
-        GOOGLE_CLIENT_SECRET: fake_secret
-        REDIS_URL: redis://localhost:6379/0
+        GOOGLE_CLIENT_ID: dummy_client_id
+        GOOGLE_CLIENT_SECRET: dummy_client_secret
       run: |
         cd backend
         python -m pytest tests/

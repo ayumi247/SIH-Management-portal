@@ -27,11 +27,11 @@ def create_team(team: TeamCreate, background_tasks: BackgroundTasks, current_use
         raise HTTPException(status_code=400, detail="Maximum 5 additional members can be invited at creation.")
         
     if team.members:
-        # Diversity Lock Check
-        has_female = (current_user.gender and current_user.gender.lower() == 'female') or \
-                     any(m.gender.lower() == 'female' for m in team.members)
-        if not has_female:
-            raise HTTPException(status_code=400, detail="The Diversity Lock: Team must include at least one female member.")
+        # Diversity Lock Check (Temporarily Disabled)
+        # has_female = (current_user.gender and current_user.gender.lower() == 'female') or \
+        #              any(m.gender.lower() == 'female' for m in team.members)
+        # if not has_female:
+        #     raise HTTPException(status_code=400, detail="The Diversity Lock: Team must include at least one female member.")
 
         # Strict College Lock & Single Team Lock for invited members
         for m in team.members:
@@ -206,9 +206,9 @@ def finalize_team(team_id: UUID, current_user: Users = Depends(get_current_user)
     
     users = session.exec(select(Users).where(Users.id.in_(user_ids))).all()
     
-    has_female = any(u.gender and u.gender.lower() == "female" for u in users)
-    if not has_female:
-        raise HTTPException(status_code=400, detail="The Diversity Lock: Team requires at least one female member to finalize")
+    # has_female = any(u.gender and u.gender.lower() == "female" for u in users)
+    # if not has_female:
+    #     raise HTTPException(status_code=400, detail="The Diversity Lock: Team requires at least one female member to finalize")
         
     team.is_finalized = True
     session.add(team)

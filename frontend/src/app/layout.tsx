@@ -18,9 +18,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.className} antialiased min-h-screen bg-zinc-950 text-zinc-50 selection:bg-indigo-500/30`}
+        className={`${inter.className} antialiased min-h-screen bg-zinc-950 text-zinc-50 selection:bg-blue-500/30 flex flex-col border-t-8 border-b-8 border-blue-600`}
       >
-        {children}
+        <main className="flex-grow flex flex-col">
+          {children}
+        </main>
+        <footer className="py-6 text-center text-sm text-zinc-500 border-t border-zinc-900 bg-zinc-950">
+          <p>&copy; 2026 SIH Matchmaker. All rights reserved. <a href="/privacy" className="text-blue-500 hover:underline ml-2">Privacy Policy</a></p>
+        </footer>
         <Toaster theme="dark" position="top-center" richColors />
       </body>
     </html>
