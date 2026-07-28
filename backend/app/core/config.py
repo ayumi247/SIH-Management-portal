@@ -7,7 +7,6 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
-    REDIS_URL: str
     SENDPULSE_API_KEY: str
     
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")

@@ -68,7 +68,7 @@ def create_team(team: TeamCreate, background_tasks: BackgroundTasks, current_use
             
         session.add(TeamMembers(team_id=new_team.id, user_id=existing_user.id))
         
-        # Trigger Celery Email
+        # Send Email Notification
         from app.core.email import send_email_notification
         subject = f"You've been added to team {new_team.name}!"
         body = f"Hello {existing_user.name},\n\nYou have been added to the team {new_team.name} by {current_user.name} for the SIH Matchmaker. Log in to check your team hub!"
@@ -177,7 +177,7 @@ def resolve_request(team_id: UUID, req_id: UUID, req_update: JoinRequestUpdate, 
         session.add(new_member)
         session.commit()
         
-        # Trigger Celery Email
+        # Send Email Notification
         req_user = session.get(Users, req.user_id)
         if req_user and req_user.email:
             from app.core.email import send_email_notification
