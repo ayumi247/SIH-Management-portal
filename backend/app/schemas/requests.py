@@ -6,6 +6,8 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
+    gender: str
+    college_id: UUID
     github_url: Optional[str] = None
     linkedin_url: Optional[str] = None
 

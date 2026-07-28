@@ -52,6 +52,7 @@ export default function MyTeamPage() {
       setLoading(false);
       return;
     }
+    setLoading(true); // Ensure loading state is active while fetching
     try {
       const [teamRes, reqRes] = await Promise.all([
         api.get(`/teams/${teamId}`),

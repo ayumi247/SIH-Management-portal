@@ -6,6 +6,8 @@ import { Search, MapPin, Building2 } from "lucide-react";
 import TeamGrid from "./components/TeamGrid";
 import { toast } from "sonner";
 
+import { useStore } from "@/store/useStore";
+
 interface College {
   id: string;
   name: string;
@@ -14,6 +16,7 @@ interface College {
 }
 
 export default function DashboardPage() {
+  const { user } = useStore();
   const [colleges, setColleges] = useState<College[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCollegeId, setSelectedCollegeId] = useState<string | null>(null);
@@ -24,7 +27,11 @@ export default function DashboardPage() {
         const res = await api.get("/sih/colleges");
         setColleges(res.data);
         if (res.data.length > 0) {
-          setSelectedCollegeId(res.data[0].id);
+          if (user?.college_id) {
+            setSelectedCollegeId(user.college_id);
+          } else {
+            setSelectedCollegeId(res.data[0].id);
+          }
         }
       } catch (error) {
         toast.error("Failed to load colleges");

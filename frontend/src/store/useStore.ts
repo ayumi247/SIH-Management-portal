@@ -8,6 +8,8 @@ export interface User {
   gender?: string;
   skills?: string[];
   study_year?: number;
+  team_id?: string;
+  is_leader?: boolean;
 }
 
 export interface Message {
@@ -40,7 +42,12 @@ export const useStore = create<StoreState>((set) => ({
   
   setAuth: (token, user) => {
     if (typeof window !== 'undefined') localStorage.setItem('token', token);
-    set({ token, user });
+    set({ 
+      token, 
+      user,
+      teamId: user.team_id || null,
+      isLeader: user.is_leader || false
+    });
   },
   logout: () => {
     if (typeof window !== 'undefined') localStorage.removeItem('token');

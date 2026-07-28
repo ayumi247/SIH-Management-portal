@@ -29,6 +29,8 @@ def register(user_data: UserCreate, session: Session = Depends(get_session)):
         name=user_data.name, 
         email=user_data.email, 
         password_hash=hashed_password,
+        gender=user_data.gender,
+        college_id=user_data.college_id,
         github_url=user_data.github_url,
         linkedin_url=user_data.linkedin_url
     )
