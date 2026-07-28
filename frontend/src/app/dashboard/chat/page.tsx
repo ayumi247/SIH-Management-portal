@@ -20,7 +20,8 @@ export default function ChatPage() {
     if (!teamId || !token) return;
 
     // Connect to WebSocket using standard ws:// for local development
-    const socket = new WebSocket(`ws://localhost:8000/api/chat/team/${teamId}?token=${token}`);
+    const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+    const socket = new WebSocket(`${wsBaseUrl}/api/chat/team/${teamId}?token=${token}`);
     
     socket.onopen = () => setIsConnected(true);
     socket.onclose = () => setIsConnected(false);

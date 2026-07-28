@@ -120,4 +120,4 @@ async def google_callback(request: Request, session: Session = Depends(get_sessi
         
     access_token = create_access_token(subject=str(user.id))
     from fastapi.responses import RedirectResponse
-    return RedirectResponse(url=f"http://localhost:3000/auth/callback?token={access_token}")
+    return RedirectResponse(url=f"{settings.FRONTEND_URL}/auth/callback?token={access_token}")

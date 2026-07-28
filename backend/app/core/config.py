@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
     SENDPULSE_API_KEY: str
+    FRONTEND_URL: str = "http://localhost:3000"
     
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
