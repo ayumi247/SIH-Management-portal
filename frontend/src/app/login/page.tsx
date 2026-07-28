@@ -45,7 +45,14 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+    let apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) {
+      if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
+        apiUrl = "https://sih-matchmaker-api.onrender.com/api";
+      } else {
+        apiUrl = "http://localhost:8000/api";
+      }
+    }
     window.location.href = `${apiUrl}/auth/google/login`;
   };
 
