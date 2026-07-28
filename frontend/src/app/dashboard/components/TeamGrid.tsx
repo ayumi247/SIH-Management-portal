@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, Users, Shield, ArrowRight, Zap } from "lucide-react";
 import { useStore } from "@/store/useStore";
@@ -65,28 +62,31 @@ export default function TeamGrid({ collegeId }: TeamGridProps) {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      <div className="flex-1 flex items-center justify-center bg-black">
+        <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-          Registered Teams
-          <Badge variant="secondary" className="bg-white/10 text-zinc-300 ml-2">{teams.length}</Badge>
-        </h2>
+    <div className="flex-1 bg-black overflow-y-auto p-8 custom-scrollbar">
+      <div className="mb-8 flex items-end justify-between border-b border-zinc-800 pb-4">
+        <div>
+          <h2 className="text-3xl font-black tracking-tighter text-white uppercase">College Teams</h2>
+          <p className="text-sm text-zinc-500 uppercase tracking-widest mt-1">Discover & Recruit</p>
+        </div>
+        <div className="text-xs font-bold text-sky-500 uppercase tracking-widest bg-sky-500/10 px-3 py-1 border border-sky-500/20">
+          {teams.length} Active
+        </div>
       </div>
 
       {teams.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 border border-dashed border-white/10 rounded-xl bg-white/5">
-          <Shield className="h-10 w-10 text-zinc-500 mb-3" />
-          <p className="text-zinc-400">No teams have been formed at this college yet.</p>
+        <div className="flex flex-col items-center justify-center py-24 border border-zinc-800 border-dashed bg-zinc-950">
+          <Shield className="h-10 w-10 text-zinc-600 mb-4" />
+          <p className="text-sm text-zinc-500 uppercase tracking-widest font-bold">No teams detected at this node.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {teams.map((team) => {
             const isMyTeam = team.id === teamId;
             const canRequest = !teamId && !team.is_finalized && team.member_count < 6;
@@ -94,74 +94,71 @@ export default function TeamGrid({ collegeId }: TeamGridProps) {
             const isMatch = team.required_skills?.some(skill => userSkills.includes(skill));
 
             return (
-              <Card key={team.id} className={`bg-zinc-900/60 border-white/10 backdrop-blur-md overflow-hidden transition-all hover:bg-zinc-900/80 hover:border-white/20 group flex flex-col ${isMatch ? 'border-indigo-500/50 shadow-[0_0_15px_rgba(79,70,229,0.1)]' : ''}`}>
-                <CardHeader className="p-4 pb-2 border-b border-white/5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-10 w-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                        <Shield className="h-5 w-5 text-indigo-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg text-white truncate max-w-[150px]">
-                          {team.name}
-                        </h3>
-                        {isMyTeam && <Badge className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border-0 mt-1 mr-2">Your Team</Badge>}
-                        {isMatch && !isMyTeam && <Badge className="bg-amber-500/10 text-amber-500 border-0 mt-1"><Zap className="h-3 w-3 mr-1"/> Top Match</Badge>}
+              <div key={team.id} className={`flex flex-col bg-zinc-950 border transition-colors group ${isMatch ? 'border-sky-500/50 hover:border-sky-500' : 'border-zinc-800 hover:border-zinc-600'}`}>
+                <div className="p-6 flex-1 flex flex-col">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-black text-xl text-white uppercase truncate max-w-[200px]">
+                        {team.name}
+                      </h3>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {isMyTeam && <span className="text-[10px] font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 px-2 py-0.5 border border-sky-500/20">Your Team</span>}
+                        {isMatch && !isMyTeam && <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-500 bg-yellow-500/10 px-2 py-0.5 border border-yellow-500/20 flex items-center gap-1"><Zap className="h-3 w-3"/> Match</span>}
                       </div>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="p-4 flex-grow">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-zinc-400 flex items-center">
-                      <Users className="h-4 w-4 mr-1.5" />
-                      {team.member_count} / 6 Members
+                  
+                  <div className="flex items-center justify-between mb-6 border-b border-zinc-800 pb-4">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center">
+                      <Users className="h-4 w-4 mr-2" />
+                      {team.member_count} / 6
                     </span>
                     {team.is_finalized ? (
-                      <Badge className="bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/10">Finalized</Badge>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-green-500 bg-green-500/10 px-2 py-0.5 border border-green-500/20">Finalized</span>
                     ) : (
-                      <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/10">Recruiting</Badge>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-sky-500 bg-sky-500/10 px-2 py-0.5 border border-sky-500/20">Recruiting</span>
                     )}
                   </div>
                   
                   {team.problem_statement && (
-                    <div className="text-sm text-zinc-300 line-clamp-2 mb-3">
-                      <span className="text-zinc-500 text-xs uppercase tracking-wider block mb-1">Problem Statement</span>
-                      {team.problem_statement}
+                    <div className="mb-4">
+                      <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest block mb-1">Problem Statement</span>
+                      <p className="text-sm text-zinc-300 line-clamp-2">{team.problem_statement}</p>
                     </div>
                   )}
 
                   {team.required_skills && team.required_skills.length > 0 && (
-                    <div className="mt-3">
-                      <span className="text-zinc-500 text-xs uppercase tracking-wider block mb-2">Looking for</span>
-                      <div className="flex flex-wrap gap-1.5">
+                    <div className="mt-auto pt-4">
+                      <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest block mb-2">Required Protocols</span>
+                      <div className="flex flex-wrap gap-2">
                         {team.required_skills.map((skill, idx) => (
-                          <Badge key={idx} variant="outline" className={`text-xs ${userSkills.includes(skill) ? 'border-amber-500/30 text-amber-400 bg-amber-500/10' : 'border-white/10 text-zinc-300'}`}>
+                          <span key={idx} className={`text-[10px] font-bold uppercase px-2 py-1 border ${userSkills.includes(skill) ? 'border-yellow-500/30 text-yellow-500 bg-yellow-500/10' : 'border-zinc-800 text-zinc-400 bg-black'}`}>
                             {skill}
-                          </Badge>
+                          </span>
                         ))}
                       </div>
                     </div>
                   )}
-                </CardContent>
-                <CardFooter className="p-4 pt-0 mt-auto">
+                </div>
+                
+                <div className="p-4 bg-black border-t border-zinc-800 mt-auto">
                   {canRequest ? (
-                    <Button 
+                    <button 
                       onClick={() => handleRequestJoin(team.id)}
-                      className={`w-full text-white transition-all ${isMatch ? 'bg-amber-600 hover:bg-amber-700 shadow-[0_0_15px_rgba(217,119,6,0.3)]' : 'bg-indigo-600 hover:bg-indigo-700 shadow-[0_0_15px_rgba(79,70,229,0.3)]'}`}
+                      className={`w-full py-3 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center ${isMatch ? 'bg-sky-500 hover:bg-sky-400 text-black' : 'bg-white hover:bg-zinc-200 text-black'}`}
                     >
-                      Request to Join <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
+                      Request Join <ArrowRight className="h-4 w-4 ml-2" />
+                    </button>
                   ) : (
-                    <Button 
-                      variant="ghost" 
-                      className="w-full text-zinc-500 cursor-default hover:bg-transparent hover:text-zinc-500 border border-white/5"
+                    <button 
+                      disabled
+                      className="w-full py-3 text-xs font-bold uppercase tracking-widest text-zinc-600 border border-zinc-800 cursor-not-allowed"
                     >
-                      {isMyTeam ? "You are a member" : team.is_finalized ? "Team is finalized" : team.member_count >= 6 ? "Team is full" : "Cannot request"}
-                    </Button>
+                      {isMyTeam ? "Active Member" : team.is_finalized ? "Deployment Finalized" : team.member_count >= 6 ? "Roster Full" : "Access Restricted"}
+                    </button>
                   )}
-                </CardFooter>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>

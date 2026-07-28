@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Loader2, Save } from "lucide-react";
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -56,76 +53,88 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-white">Loading...</div>;
+  if (loading) return (
+    <div className="flex-1 flex items-center justify-center bg-black">
+      <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+    </div>
+  );
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Your Profile</h1>
-        <p className="text-zinc-400">Update your social links and skills to help teams find you.</p>
-      </div>
+    <div className="flex-1 bg-black p-8 overflow-y-auto">
+      <div className="max-w-2xl mx-auto space-y-8">
+        
+        <div>
+          <h1 className="text-4xl font-black tracking-tighter text-white uppercase">Operative Profile</h1>
+          <p className="text-sm text-zinc-500 uppercase tracking-widest mt-2">Update your social links and protocols to enhance recruitment.</p>
+        </div>
 
-      <Card className="bg-zinc-900/60 border-white/10 backdrop-blur-md">
-        <form onSubmit={handleSubmit}>
-          <CardHeader>
-            <CardTitle className="text-white">Profile Details</CardTitle>
-            <CardDescription className="text-zinc-400">These details will be visible to Team Leaders when you request to join.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-zinc-950 border border-zinc-800 p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            
             <div className="space-y-2">
-              <Label htmlFor="github" className="text-zinc-300">GitHub Profile URL</Label>
-              <Input 
+              <label htmlFor="github" className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">GitHub Coordinates</label>
+              <input 
                 id="github" 
                 placeholder="https://github.com/yourusername" 
-                className="bg-black/20 border-white/10 text-white"
+                className="w-full bg-black border border-zinc-800 text-white h-12 px-4 rounded-none focus:outline-none focus:border-sky-500 transition-colors"
                 value={formData.github_url}
                 onChange={e => setFormData({...formData, github_url: e.target.value})}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="linkedin" className="text-zinc-300">LinkedIn Profile URL</Label>
-              <Input 
+              <label htmlFor="linkedin" className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">LinkedIn Coordinates</label>
+              <input 
                 id="linkedin" 
                 placeholder="https://linkedin.com/in/yourusername" 
-                className="bg-black/20 border-white/10 text-white"
+                className="w-full bg-black border border-zinc-800 text-white h-12 px-4 rounded-none focus:outline-none focus:border-sky-500 transition-colors"
                 value={formData.linkedin_url}
                 onChange={e => setFormData({...formData, linkedin_url: e.target.value})}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="skills" className="text-zinc-300">Skills (comma separated)</Label>
-              <Input 
+              <label htmlFor="skills" className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Protocols (Comma Separated)</label>
+              <input 
                 id="skills" 
                 placeholder="React, Python, UI/UX" 
-                className="bg-black/20 border-white/10 text-white"
+                className="w-full bg-black border border-zinc-800 text-white h-12 px-4 rounded-none focus:outline-none focus:border-sky-500 transition-colors"
                 value={formData.skills}
                 onChange={e => setFormData({...formData, skills: e.target.value})}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="year" className="text-zinc-300">Year of Study</Label>
-              <Input 
+              <label htmlFor="year" className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Study Phase (Year)</label>
+              <input 
                 id="year" 
                 type="number"
                 min="1"
                 max="5"
                 placeholder="3" 
-                className="bg-black/20 border-white/10 text-white"
+                className="w-full bg-black border border-zinc-800 text-white h-12 px-4 rounded-none focus:outline-none focus:border-sky-500 transition-colors"
                 value={formData.study_year}
                 onChange={e => setFormData({...formData, study_year: e.target.value})}
               />
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white w-full">
-              {saving ? "Saving..." : "Save Profile"}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+            
+            <div className="pt-4">
+              <button 
+                type="submit" 
+                disabled={saving} 
+                className="w-full h-12 bg-sky-500 hover:bg-sky-400 text-black text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center disabled:opacity-50"
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Commit Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

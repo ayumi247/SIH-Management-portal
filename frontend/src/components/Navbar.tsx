@@ -44,10 +44,10 @@ export function Navbar() {
                     Dashboard
                   </Button>
                 </Link>
-                <Link href="/dashboard/team">
+                <Link href="/dashboard/my-team">
                   <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-sky-400 hover:bg-zinc-900 rounded-sm">
                     <Shield className="h-4 w-4 mr-2" />
-                    Team Hub
+                    My Team
                   </Button>
                 </Link>
                 <Link href="/dashboard/chat">
