@@ -10,13 +10,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useEffect, useState } from "react";
 
 export function Navbar() {
-  const { token, user, logout } = useStore();
+  const { token, user, logout, hydrateAuth } = useStore();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    hydrateAuth();
     setMounted(true);
-  }, []);
+  }, [hydrateAuth]);
 
   const handleLogout = () => {
     logout();

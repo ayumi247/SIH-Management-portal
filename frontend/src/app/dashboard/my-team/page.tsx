@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
@@ -47,9 +47,14 @@ export default function MyTeamPage() {
   const [requiredSkills, setRequiredSkills] = useState("");
   const [invitees, setInvitees] = useState<{name: string, email: string, gender: string}[]>([]);
 
+  const mountedRef = React.useRef(true);
+  useEffect(() => {
+    return () => { mountedRef.current = false; };
+  }, []);
+
   const fetchTeamData = useCallback(async () => {
     if (!teamId) {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
       return;
     }
     setLoading(true); // Ensure loading state is active while fetching
@@ -58,12 +63,14 @@ export default function MyTeamPage() {
         api.get(`/teams/${teamId}`),
         isLeader ? api.get(`/teams/${teamId}/requests`) : Promise.resolve({ data: [] })
       ]);
-      setTeamData(teamRes.data);
-      if (isLeader) setRequests(reqRes.data);
+      if (mountedRef.current) {
+        setTeamData(teamRes.data);
+        if (isLeader) setRequests(reqRes.data);
+      }
     } catch (error) {
-      toast.error("Failed to load team data");
+      if (mountedRef.current) toast.error("Failed to load team data");
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, [teamId, isLeader]);
 

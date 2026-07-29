@@ -31,15 +31,26 @@ interface StoreState {
   setTeam: (teamId: string | null, isLeader: boolean) => void;
   addChatMessage: (msg: Message) => void;
   clearChat: () => void;
+  hydrateAuth: () => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
+  token: null,
   user: null,
   teamId: null,
   isLeader: false,
   chatMessages: [],
   
+  hydrateAuth: () => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        set({ token });
+        // NOTE: User object hydration requires another mechanism or a /me fetch.
+        // Usually, the app fetches user details if token exists.
+      }
+    }
+  },
   setAuth: (token, user) => {
     if (typeof window !== 'undefined') localStorage.setItem('token', token);
     set({ 

@@ -1,19 +1,26 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from uuid import UUID
 
 class UserCreate(BaseModel):
-    name: str
+    name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=6, max_length=100)
     gender: str
     college_id: UUID
     github_url: Optional[str] = None
     linkedin_url: Optional[str] = None
 
+class ProfileUpdate(BaseModel):
+    github_url: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    skills: Optional[List[str]] = None
+    study_year: Optional[int] = None
+    college_id: Optional[UUID] = None
+
 class UserLogin(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=6, max_length=100)
 
 class TeamMemberCreate(BaseModel):
     name: str

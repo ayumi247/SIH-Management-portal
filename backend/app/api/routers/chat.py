@@ -4,6 +4,7 @@ from typing import Optional, Dict, List
 from uuid import UUID
 import json
 from jose import jwt, JWTError
+from starlette.concurrency import run_in_threadpool
 
 from app.core.db import get_session
 from app.core.config import settings
@@ -45,7 +46,11 @@ async def get_user_from_token(token: str, session: Session) -> Optional[Users]:
         user_id = payload.get("sub")
         if user_id is None:
             return None
-        user = session.get(Users, user_id)
+            
+        def fetch_user():
+            return session.get(Users, user_id)
+            
+        user = await run_in_threadpool(fetch_user)
         return user
     except JWTError:
         return None
@@ -64,8 +69,12 @@ async def websocket_chat(
         return
         
     # Check if user is in team
-    team_member = session.exec(select(TeamMembers).where(TeamMembers.team_id == team_id, TeamMembers.user_id == user.id)).first()
-    team = session.get(Teams, team_id)
+    def get_team_info():
+        tm = session.exec(select(TeamMembers).where(TeamMembers.team_id == team_id, TeamMembers.user_id == user.id)).first()
+        t = session.get(Teams, team_id)
+        return tm, t
+        
+    team_member, team = await run_in_threadpool(get_team_info)
     if not team_member and (team and team.leader_id != user.id):
         await websocket.close(code=4003, reason="Forbidden")
         return
@@ -79,9 +88,13 @@ async def websocket_chat(
             data = await websocket.receive_text()
             
             # Save message to database
-            new_message = Messages(team_id=team_id, sender_id=user.id, content=data)
-            session.add(new_message)
-            session.commit()
+            def save_message():
+                msg = Messages(team_id=team_id, sender_id=user.id, content=data)
+                session.add(msg)
+                session.commit()
+                return msg
+                
+            new_message = await run_in_threadpool(save_message)
             
             # Publish to all connected clients in the team
             payload = json.dumps({

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlmodel import Session, select
+from starlette.concurrency import run_in_threadpool
 from app.core.db import get_session
 from app.models.domain import Users
 from app.schemas.requests import UserCreate, UserLogin
@@ -82,6 +83,7 @@ class ProfileUpdate(BaseModel):
     linkedin_url: Optional[str] = None
     skills: Optional[List[str]] = None
     study_year: Optional[int] = None
+    college_id: Optional[str] = None
 
 @router.put("/profile")
 def update_profile(update_data: ProfileUpdate, current_user: Users = Depends(get_current_user), session: Session = Depends(get_session)):
@@ -89,6 +91,7 @@ def update_profile(update_data: ProfileUpdate, current_user: Users = Depends(get
     if update_data.linkedin_url is not None: current_user.linkedin_url = update_data.linkedin_url
     if update_data.skills is not None: current_user.skills = update_data.skills
     if update_data.study_year is not None: current_user.study_year = update_data.study_year
+    if update_data.college_id is not None: current_user.college_id = update_data.college_id
     
     session.add(current_user)
     session.commit()
@@ -113,12 +116,16 @@ async def google_callback(request: Request, session: Session = Depends(get_sessi
     email = user_info.get("email")
     name = user_info.get("name")
     
-    user = session.exec(select(Users).where(Users.email == email)).first()
-    if not user:
-        user = Users(name=name, email=email, oauth_provider="google")
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+    def process_google_user():
+        u = session.exec(select(Users).where(Users.email == email)).first()
+        if not u:
+            u = Users(name=name, email=email, oauth_provider="google")
+            session.add(u)
+            session.commit()
+            session.refresh(u)
+        return u
+        
+    user = await run_in_threadpool(process_google_user)
         
     access_token = create_access_token(subject=str(user.id))
     from fastapi.responses import RedirectResponse

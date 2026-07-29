@@ -31,7 +31,12 @@ export default function RegisterPage() {
       toast.success("Account created! Please log in.");
       router.push("/login");
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Failed to register.");
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        toast.error(detail[0].msg || "Validation error");
+      } else {
+        toast.error(detail || "Failed to register.");
+      }
     } finally {
       setLoading(false);
     }

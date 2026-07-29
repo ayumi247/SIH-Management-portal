@@ -10,7 +10,7 @@ export function Footer() {
         
         <nav className="flex items-center gap-6 text-sm">
           <Link href="/" className="hover:text-sky-400 transition-colors">Home</Link>
-          <Link href="/dashboard/team" className="hover:text-sky-400 transition-colors">Team Build</Link>
+          <Link href="/dashboard/my-team" className="hover:text-sky-400 transition-colors">Team Build</Link>
           <Link href="/privacy" className="hover:text-sky-400 transition-colors">Privacy Policy</Link>
         </nav>
       </div>

@@ -32,7 +32,12 @@ export default function LoginPage() {
       toast.success("Login successful");
       router.push("/dashboard");
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Failed to login");
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        toast.error(detail[0].msg || "Validation error");
+      } else {
+        toast.error(detail || "Failed to login.");
+      }
     } finally {
       setLoading(false);
     }

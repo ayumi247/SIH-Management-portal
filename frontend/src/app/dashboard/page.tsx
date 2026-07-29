@@ -11,8 +11,7 @@ import { useStore } from "@/store/useStore";
 interface College {
   id: string;
   name: string;
-  city: string;
-  state: string;
+  location: string;
 }
 
 export default function DashboardPage() {
@@ -74,7 +73,7 @@ export default function DashboardPage() {
               </div>
               <div className="text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-2">
                 <MapPin className="h-3 w-3 shrink-0" />
-                {college.city}, {college.state}
+                {college.location || "Unknown Location"}
               </div>
             </button>
           ))}

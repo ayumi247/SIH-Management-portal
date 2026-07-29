@@ -26,6 +26,7 @@ export default function TeamGrid({ collegeId }: TeamGridProps) {
   const { user, teamId } = useStore();
 
   useEffect(() => {
+    let isMounted = true;
     const fetchTeams = async () => {
       setLoading(true);
       try {
@@ -41,14 +42,15 @@ export default function TeamGrid({ collegeId }: TeamGridProps) {
           return bMatch - aMatch;
         });
         
-        setTeams(fetchedTeams);
+        if (isMounted) setTeams(fetchedTeams);
       } catch (error) {
-        toast.error("Failed to load teams");
+        if (isMounted) toast.error("Failed to load teams");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     if (collegeId) fetchTeams();
+    return () => { isMounted = false; };
   }, [collegeId, user]);
 
   const handleRequestJoin = async (targetTeamId: string) => {
