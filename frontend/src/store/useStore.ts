@@ -56,8 +56,8 @@ export const useStore = create<StoreState>((set) => ({
     set({ 
       token, 
       user,
-      teamId: user.team_id || null,
-      isLeader: user.is_leader || false
+      teamId: user?.team_id || null,
+      isLeader: user?.is_leader || false
     });
   },
   logout: () => {
