@@ -22,6 +22,8 @@ def create_team(team: TeamCreate, background_tasks: BackgroundTasks, current_use
         college = session.get(Colleges, current_user.college_id)
         if college and college.name.lower() in team.name.lower():
             raise HTTPException(status_code=400, detail="Team name cannot contain the college name")
+    else:
+        raise HTTPException(status_code=400, detail="You must update your profile and select a college before creating a team.")
 
     if len(team.members) > 5:
         raise HTTPException(status_code=400, detail="Maximum 5 additional members can be invited at creation.")
