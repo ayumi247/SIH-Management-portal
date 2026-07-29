@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-from sqlmodel import Session, select
+from sqlmodel import Session, select, col
 from uuid import UUID
 from app.core.db import get_session
 from app.models.domain import Teams, Colleges, Users, JoinRequests, TeamMembers
@@ -7,6 +7,43 @@ from app.schemas.requests import TeamCreate, JoinRequestUpdate
 from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/teams", tags=["Teams"])
+
+@router.get("/admin/cleanup")
+def cleanup_database(session: Session = Depends(get_session)):
+    # Find test teams
+    query = select(Teams).where(
+        (col(Teams.name).ilike('%Test%')) | 
+        (col(Teams.name).ilike('%hack%'))
+    )
+    test_teams = session.exec(query).all()
+    
+    for team in test_teams:
+        reqs = session.exec(select(JoinRequests).where(JoinRequests.team_id == team.id)).all()
+        for r in reqs: session.delete(r)
+        
+        members = session.exec(select(TeamMembers).where(TeamMembers.team_id == team.id)).all()
+        for m in members: session.delete(m)
+        session.delete(team)
+        
+    teams_missing_college = session.exec(select(Teams).where(Teams.college_id == None)).all()
+    default_college = session.exec(select(Colleges).where(Colleges.name.ilike('%DSEU%'))).first()
+    if not default_college:
+        default_college = session.exec(select(Colleges)).first()
+
+    for team in teams_missing_college:
+        leader = session.get(Users, team.leader_id)
+        if leader and leader.college_id:
+            team.college_id = leader.college_id
+        else:
+            if default_college:
+                team.college_id = default_college.id
+                if leader:
+                    leader.college_id = default_college.id
+                    session.add(leader)
+        session.add(team)
+        
+    session.commit()
+    return {"message": f"Cleanup complete. Deleted {len(test_teams)} test teams. Fixed {len(teams_missing_college)} orphaned teams."}
 
 @router.post("")
 def create_team(team: TeamCreate, background_tasks: BackgroundTasks, current_user: Users = Depends(get_current_user), session: Session = Depends(get_session)):
