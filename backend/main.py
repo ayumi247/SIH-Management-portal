@@ -6,6 +6,10 @@ from app.api.routers import auth, sih, teams, chat
 app = FastAPI(title="Hackathon Matchmaker API", version="1.0.0")
 
 from fastapi.middleware.cors import CORSMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+
+# Trust proxy headers from Render load balancer to fix HTTPS redirect URIs in OAuth
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # Add CORS middleware to allow frontend connections
 app.add_middleware(

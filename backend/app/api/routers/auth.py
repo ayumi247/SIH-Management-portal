@@ -99,14 +99,18 @@ def update_profile(update_data: ProfileUpdate, current_user: Users = Depends(get
 
 @router.get("/google/login")
 async def google_login(request: Request):
-    redirect_uri = request.url_for('google_callback')
+    redirect_uri = str(request.url_for('google_callback'))
+    if "onrender.com" in redirect_uri and redirect_uri.startswith("http://"):
+        redirect_uri = redirect_uri.replace("http://", "https://")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @router.get("/google/callback")
 async def google_callback(request: Request, session: Session = Depends(get_session)):
     try:
         token = await oauth.google.authorize_access_token(request)
-    except Exception:
+    except Exception as e:
+        import logging
+        logging.error(f"OAuth Error: {str(e)}")
         raise HTTPException(status_code=400, detail="Google authentication failed or credentials missing")
     
     user_info = token.get('userinfo')
